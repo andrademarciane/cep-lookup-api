@@ -14,7 +14,7 @@ RSpec.describe Api::AddressCreatorService, type: :service do
   end
 
   describe '#create_or_update_address' do
-    subject { described_class.new(user, address_data).create_or_update_address }
+    subject { described_class.new(user.id, address_data).create_or_update_address }
 
     context 'when the address does not exist' do
       it 'creates a new address with correct attributes' do

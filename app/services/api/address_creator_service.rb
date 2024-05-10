@@ -1,10 +1,8 @@
-# frozen_string_literal: true
-
 class Api::AddressCreatorService
-  attr_reader :user, :address_data
+  attr_reader :user_id, :address_data
 
-  def initialize(user, address_data)
-    @user = user
+  def initialize(user_id, address_data)
+    @user_id = user_id
     @address_data = address_data
   end
 
@@ -27,6 +25,6 @@ class Api::AddressCreatorService
   end
 
   def find_or_initialize_address
-    user.addresses.find_or_initialize_by(cep: address_data['cep'])
+    Address.find_or_initialize_by(user_id: user_id, cep: address_data['cep'])
   end
 end

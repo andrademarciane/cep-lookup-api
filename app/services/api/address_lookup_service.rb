@@ -3,7 +3,7 @@ require 'json'
 require 'concurrent'
 
 class Api::AddressLookupService
-  VIA_CEP_URL = 'https://viacep.com.br/ws/'
+  VIA_CEP_URL = 'https://viacep.com.br/ws'
   CACHE_EXPIRATION = 3600
 
   attr_reader :user, :cep
@@ -19,6 +19,8 @@ class Api::AddressLookupService
     handle_address_response(via_cep_address)
 
     create_or_update_address(via_cep_address)
+
+    via_cep_address
   rescue StandardError => e
     Rails.logger.error "Failed to create or update address: #{e.message}"
     raise
@@ -27,20 +29,22 @@ class Api::AddressLookupService
   private
 
   def create_or_update_address(via_cep_address)
-    Api::AddressCreatorService.new(user, via_cep_address).create_or_update_address
+    AddressCreatorWorker.perform_async(user.id, via_cep_address)
   end
 
   def fetch_address
     uri = URI.parse("#{VIA_CEP_URL}/#{cep}/json")
     response = Net::HTTP.get_response(uri)
 
-    unless response.is_a?(Net::HTTPSuccess)
-      raise StandardError, "Failed to fetch address for CEP #{cep}: #{response.message}"
-    end
+    handle_failed_response(response) unless response.is_a?(Net::HTTPSuccess)
 
     JSON.parse(response.body)
   rescue JSON::ParserError => e
     raise StandardError, "Failed to fetch address for CEP: #{e.message}"
+  end
+
+  def handle_failed_response(response)
+    raise StandardError, "Failed to fetch address for CEP #{cep}: #{response.message}"
   end
 
   def handle_address_response(address)
@@ -49,11 +53,8 @@ class Api::AddressLookupService
     raise StandardError, "CEP #{cep} not found or invalid"
   end
 
-  def cache_fetch(key)
-    Rails.cache.fetch(cache_key(key), expires_in: CACHE_EXPIRATION) do
-      address = Concurrent::Future.execute { fetch_address }
-      address.value
-    end
+  def cache_fetch(key, &block)
+    Rails.cache.fetch(cache_key(key), expires_in: CACHE_EXPIRATION, &block)
   end
 
   def cache_key(key)

@@ -1,4 +1,3 @@
-# spec/controllers/api/addresses_controller_spec.rb
 require 'rails_helper'
 
 RSpec.describe Api::AddressesController, type: :controller do
@@ -16,11 +15,12 @@ RSpec.describe Api::AddressesController, type: :controller do
       let(:cep) { '12345678' }
       let(:address_data) do
         {
-          'cep' => cep,
-          'logradouro' => 'Rua Teste',
-          'bairro' => 'Bairro Teste',
-          'localidade' => 'Cidade Teste',
-          'uf' => 'TS'
+            cep: cep,
+            logradouro: 'Rua Teste',
+            complemento: 'Apto 101',
+            bairro: 'Bairro Teste',
+            localidade: 'Cidade Teste',
+            uf: 'TS'
         }
       end
 
@@ -32,7 +32,7 @@ RSpec.describe Api::AddressesController, type: :controller do
       it 'returns status 200 with the address data' do
         get :show, params: { cep: cep }
         expect(response).to have_http_status(:ok)
-        expect(JSON.parse(response.body)['address']).to eq(address_data)
+        expect(JSON.parse(response.body)['address']).to eq(JSON.parse(Api::AddressSerializer.new(address_data).serialize))
       end
     end
 

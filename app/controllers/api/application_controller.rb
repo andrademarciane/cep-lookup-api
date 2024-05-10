@@ -1,6 +1,5 @@
-# frozen_string_literal: true
-
 class Api::ApplicationController < ApplicationController
+  skip_before_action :verify_authenticity_token
   before_action :authenticate_user
 
   rescue_from ActionController::ParameterMissing, with: :handle_missing_parameters

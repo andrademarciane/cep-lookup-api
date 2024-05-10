@@ -9,14 +9,16 @@ RSpec.describe Api::AddressLookupService, type: :service do
       it 'returns the address' do
         VCR.use_cassette('valid_cep_lookup') do
           service = Api::AddressLookupService.new(user, cep)
+          expect(AddressCreatorWorker).to receive(:perform_async).with(user.id, instance_of(Hash))
           address = service.lookup
 
-          expect(address).to have_attributes(
-            cep: address.cep,
-            street: address.street,
-            neighborhood: address.neighborhood,
-            city: address.city,
-            state: address.state
+          expect(address).to include(
+            'cep' => address['cep'],
+            'logradouro' => address['logradouro'],
+            'bairro' => address['bairro'],
+            'complemento' => address['complemento'],
+            'localidade' => address['localidade'],
+            'uf' => address['uf']
           )
         end
       end
