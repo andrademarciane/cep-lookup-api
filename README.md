@@ -84,4 +84,14 @@ Esta aplicação utiliza Sidekiq para processamento de tarefas em segundo plano 
 
 ## Documentação da API
 
-Para informações detalhadas sobre os endpoints e como usar a API, consulte a documentação da API em [link para a documentação].
+Para facilitar o teste da API, existe um JSON do Postman. Este arquivo JSON está localizado na pasta `docs` do projeto.
+
+Para importar essas requisições para o Postman, siga estas etapas:
+
+1. Baixe o arquivo JSON com as requisições da API do diretório `docs` no GitHub.
+
+2. Abra o Postman e clique no botão "Import".
+
+3. Selecione a opção "Import File" e selecione o arquivo JSON que você baixou.
+
+4. Após a importação, todas as requisições da API estarão disponíveis no Postman para teste e execução.
