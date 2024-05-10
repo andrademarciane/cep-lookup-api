@@ -1,0 +1,61 @@
+version: "3.8"
+services:
+  db:
+    image: postgres
+    restart: always
+    environment:
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    volumes:
+      - db:/var/lib/postgresql/data'
+    logging:
+      driver: none
+    ports:
+      - 5433:5432
+  redis:
+    image: redis:7.0-alpine
+    command: redis-server
+    volumes:
+      - redis:/data
+    ports:
+      - 6379
+    logging:
+      driver: none
+  sidekiq:
+    build: ../
+    command: bundle exec sidekiq
+    volumes:
+      - ../:/rails-app
+    environment:
+      RAILS_ENV: development
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_BD: 12
+    depends_on:
+      - "redis"
+  web:
+    build: ../
+    command: bundle exec rails s -p 3000 -e development -b '0.0.0.0'
+    environment:
+      DB_USERNAME: postgres
+      DB_PASSWORD: P@ssw0rd!
+      DB_NAME: cep_lookup_api_development
+      DB_PORT: 5432
+      DB_HOST: db
+      RAILS_ENV: development
+      RAILS_MAX_THREADS: 5
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_BD: 12
+      BUNDLE_PATH: /bundle
+    volumes:
+      - ../:/rails-app
+      - bundle:/bundle
+    ports:
+      - "3000:3000"
+    depends_on:
+      - "db"
+      - "redis"
+volumes:
+  db:
+  bundle:
+  redis:

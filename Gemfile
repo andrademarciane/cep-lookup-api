@@ -14,8 +14,13 @@ gem 'puma', '~> 5.0'
 # Use Redis adapter to run Action Cable in production
 # gem 'redis', '~> 4.0'
 # Use Active Model has_secure_password
+gem 'active_model_serializers'
 gem 'bcrypt', '~> 3.1.7'
+gem 'dotenv-rails'
 gem 'jwt'
+gem 'pry-byebug'
+gem 'redis'
+gem 'sidekiq'
 
 # Use Active Storage variant
 # gem 'image_processing', '~> 1.2'
